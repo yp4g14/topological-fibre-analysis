@@ -82,7 +82,7 @@ def cubical_ph_boundary(
     Xt = cub.transform([filtration_image])
     df = pd.DataFrame(Xt[0], columns=['birth','death','H_k'])
     df = df[df['death']>df['birth']]
-    np.save(f"{save_path}ph_{prefix}{name}.npy",df)
+    df.to_csv(f"{save_path}ph_{name}.csv",index=False)
     if plots:
         cub.plot(Xt)
         plt.tight_layout()

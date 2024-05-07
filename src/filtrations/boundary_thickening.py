@@ -3,13 +3,14 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 from scipy import ndimage
+import matplotlib.pyplot as plt
 from gtda.homology import CubicalPersistence
 from math import sqrt, floor, ceil
 from tqdm import tqdm
 import sys
 from pathlib import Path
 sys.path.append(str(Path(os.getcwd()).parent) +'\\plotting\\')
-from pd_plots import plot_persistence_diagrams, two_phase_filtration_plot
+from pd_plots import two_phase_filtration_plot
 
 
 def boundary_thickening_PH(
@@ -129,16 +130,13 @@ def persistent_homology_boundary_thickening(
         n_jobs=-1)
     cub.fit([filtration_image], y=None)
     Xt = cub.transform([filtration_image])
-    np.save(f"{save_path}ph_{name}.npy",Xt[0])
-    df = pd.DataFrame(Xt[0], columns=['b','d','H'])
-    df['H'] = df['H'].astype(int)
-    df = df[df['b']<df['d']]
-    pts = df[(df['d']-df['b'])>sqrt(2)]
-    if pts.shape[0] > 1:
-        plot_persistence_diagrams(
-            df,
-            save_path,
-            f"ph_{name}")
+    df = pd.DataFrame(Xt[0], columns=['birth','death','H_k'])
+    df = df[df['birth']<df['death']]
+    df.to_csv(f"{save_path}ph_{name}.csv",index=False)
+    cub.plot(Xt)
+    plt.tight_layout()
+    plt.savefig(f"{save_path}ph_{name}.svg")
+    plt.close()
 
 
 if __name__ =="__main__":
