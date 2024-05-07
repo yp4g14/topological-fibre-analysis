@@ -12,6 +12,7 @@ from pathlib import Path
 sys.path.append(str(Path(os.getcwd()).parent) +'\\plotting\\')
 from pd_plots import two_phase_filtration_plot
 
+from ph import persistent_homology_cubical
 
 def boundary_thickening_PH(
     save_path,
@@ -63,7 +64,7 @@ def boundary_thickening_PH(
             save_name,
             centre)
 
-    persistent_homology_boundary_thickening(
+    persistent_homology_cubical(
         filtration_image,
         homology_dims,
         save_path,
@@ -107,37 +108,6 @@ def negative_valued_boundary_point_filtration(
     inverse_image = np.logical_not(binary_image).astype(int)
     filtration = (binary_image * boundary_mask) + inverse_image
     return filtration
-
-def persistent_homology_boundary_thickening(
-    filtration_image,
-    homology_dims,
-    save_path,
-    name):
-    """Persistent homology computation using giotto-tda
-    cubical sublevel persistence with 2 coefficients.
-
-    Args:
-        filtration_image (np array): filtration image to take sublevelsets over
-        homology_dims (list of int): list of integers of homology groups to compute
-        save_path (string): string location for saving persistence
-        name (string): string filenames for saving purposes
-    """
-    cub = CubicalPersistence(
-        homology_dimensions=homology_dims,
-        coeff=2,
-        reduced_homology=False,
-        infinity_values=np.inf,
-        n_jobs=-1)
-    cub.fit([filtration_image], y=None)
-    Xt = cub.transform([filtration_image])
-    df = pd.DataFrame(Xt[0], columns=['birth','death','H_k'])
-    df = df[df['birth']<df['death']]
-    df.to_csv(f"{save_path}ph_{name}.csv",index=False)
-    cub.plot(Xt)
-    plt.tight_layout()
-    plt.savefig(f"{save_path}ph_{name}.svg")
-    plt.close()
-
 
 if __name__ =="__main__":
     import os

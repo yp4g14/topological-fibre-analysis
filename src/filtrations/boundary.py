@@ -4,7 +4,9 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from scipy import ndimage
 from math import floor, ceil, sqrt
-from gtda.homology import CubicalPersistence
+from pathlib import Path
+
+from ph import persistent_homology_cubical
 
 def boundary_filtration(
         binary_image,
@@ -72,22 +74,11 @@ def cubical_ph_boundary(
         plt.close()
 
     # persistence
-    cub = CubicalPersistence(
-        homology_dimensions=homology_dims,
-        coeff=2,
-        reduced_homology=False,
-        infinity_values=np.inf,
-        n_jobs=-1)
-    cub.fit([filtration_image], y=None)
-    Xt = cub.transform([filtration_image])
-    df = pd.DataFrame(Xt[0], columns=['birth','death','H_k'])
-    df = df[df['death']>df['birth']]
-    df.to_csv(f"{save_path}ph_{name}.csv",index=False)
-    if plots:
-        cub.plot(Xt)
-        plt.tight_layout()
-        plt.savefig(f"{save_path}ph_{prefix}{name}.svg")
-        plt.close()
+    persistent_homology_cubical(
+        filtration_image,
+        homology_dims,
+        save_path,
+        save_name=f"{prefix}{name}")
 
 
 if __name__ == "__main__":

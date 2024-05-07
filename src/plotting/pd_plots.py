@@ -11,14 +11,14 @@ def two_phase_filtration_plot(
         filtration_image,
         save_path,
         name,
-        centre):
+        centre=None):
     """Plots the two phases of the filtration in side-by-side subplots.
 
     Args:
         filtration_image (np array): filtration valued image
         save_path (string): string location to save
         name (string): string filename for saving
-        centre (tuple): integer tuple pixel location for radial distances
+        centre (tuple, optional): integer tuple pixel location for radial distances. Defaults to None.
     """
     mpl.rcParams.update({'font.size': 17})
     neg = np.where(filtration_image<=0., filtration_image, 0.)
@@ -32,7 +32,8 @@ def two_phase_filtration_plot(
         axes.xaxis.set_ticklabels([])
         axes.yaxis.set_ticklabels([])
     neg_im = ax[0].imshow(neg, cmap='magma', vmax=0.)
-    ax[0].scatter(centre[1],centre[0],marker='o',c='b',s=50)
+    if centre:
+        ax[0].scatter(centre[1],centre[0],marker='o',c='b',s=50)
     pos_im = ax[1].imshow(pos, cmap='magma', vmin=0)
     divider_neg = make_axes_locatable(ax[0])
     divider_pos = make_axes_locatable(ax[1])
