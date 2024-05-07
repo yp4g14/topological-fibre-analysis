@@ -8,6 +8,15 @@ def persistent_homology_cubical(
     homology_dims,
     save_path,
     save_name):
+    """Compute cubical persistent homology sublevelset on 
+    filtration image values
+
+    Args:
+        filtration_image (np array): filtration valued image
+        homology_dims (list): list of integer homology dimensions
+        save_path (string): save location as string
+        save_name (string): save name as string
+    """
     cub = CubicalPersistence(
         homology_dimensions=homology_dims,
         coeff=2,
