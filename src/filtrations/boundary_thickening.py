@@ -7,6 +7,7 @@ from gtda.homology import CubicalPersistence
 from math import sqrt, floor, ceil
 from tqdm import tqdm
 import sys
+from pathlib import Path
 sys.path.append(str(Path(os.getcwd()).parent) +'\\plotting\\')
 from pd_plots import plot_persistence_diagrams, two_phase_filtration_plot
 
@@ -164,7 +165,6 @@ if __name__ =="__main__":
     # for each name run inwards (boundary-thickening) and outwards (radial-thickening)
     for name in tqdm(filenames):
         binary_image = np.load(path+name)
-        m, n = binary_image.shape
         centre = np.array(centres[name])
         boundary_thickening_PH(
             save_path+'inwards/',
