@@ -49,9 +49,19 @@ def boundary_ph(
     name,
     save_path,
     inwards=True,
-    plots=True,
     homology_dims=[0,1]):
+    """Takes in a binary image and an integer coords centre point
+    Computes the radial (outwards) filtration or the boundary (inwards)
+    filtration cubical persistent homology.
 
+    Args:
+        binary_image (np array): binary image as array shape (n,m)
+        centre (list): list of integer coordinates [centre_x, centre_y]
+        name (string): string filename for saving
+        save_path (string): string location for saving 
+        inwards (bool, optional): If True boundary in (max to min distance) filtration, else radial outwards from centre filtration. Defaults to True.
+        homology_dims (list, optional): List of integers for homology dimension computation. Defaults to [0,1].
+    """
     filtration_image, max_val = boundary_filtration(
         binary_image,
         centre,
@@ -62,16 +72,15 @@ def boundary_ph(
     else:
         prefix = 'boundary_filt_outwards_'
 
-    if plots:
-        cmap = plt.get_cmap('viridis')
-        cmap.set_bad('white')
-        fig,ax = plt.subplots()
-        filt_im_plot = np.ma.masked_equal(filtration_image, max_val)
-        im = ax.imshow(filt_im_plot, interpolation='nearest',cmap=cmap)
-        ax.axis('off')
-        plt.colorbar(im)
-        plt.savefig(f"{save_path}{prefix}{name}.svg")
-        plt.close()
+    cmap = plt.get_cmap('viridis')
+    cmap.set_bad('white')
+    fig,ax = plt.subplots()
+    filt_im_plot = np.ma.masked_equal(filtration_image, max_val)
+    im = ax.imshow(filt_im_plot, interpolation='nearest',cmap=cmap)
+    ax.axis('off')
+    plt.colorbar(im)
+    plt.savefig(f"{save_path}{prefix}{name}.svg")
+    plt.close()
 
     # persistence
     persistent_homology_cubical(

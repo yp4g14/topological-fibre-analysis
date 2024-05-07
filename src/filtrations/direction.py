@@ -5,10 +5,6 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from math import sqrt,cos,sin
 from scipy import ndimage
-import sys
-from pathlib import Path
-sys.path.append(str(Path(os.getcwd()).parent) +'\\plotting\\')
-from pd_plots import two_phase_filtration_plot
 
 from ph import persistent_homology_cubical
 
@@ -47,7 +43,7 @@ def directional_levelsets(
     else:
         return direction_image
 
-def direction_thickening_ph(
+def direction_ph(
     save_path,
     binary_image,
     name,
@@ -56,7 +52,7 @@ def direction_thickening_ph(
     n_steps=20,
     homology_dims=[0,1]
     ):
-    """Direction thickening cubical persistent homology on 2D binary image.
+    """Direction cubical persistent homology on 2D binary image.
 
     Args:
         save_path (string): string location for saving
@@ -87,86 +83,25 @@ def direction_thickening_ph(
     assert step_size < max_imsize, "step_size larger than total image size"
     config['step_size'] = step_size
 
-    # for each direction generate a levelset image with nsteps
     directional_image, max_steps_poss = directional_levelsets(
         binary_image,
         direction_s1,
         step_size,
         max_steps=True)
-    # make values negative in direction transform
-    neg_shift = max_steps_poss+1
-    negative_directional_image = directional_image - neg_shift
-    # now transform background thickening
-    inverse_image = np.logical_not(binary_image)
-    thickening_image = ndimage.distance_transform_edt(inverse_image)
-    filtration_image = np.where(negative_directional_image==np.inf, 0, negative_directional_image)+thickening_image
 
-    save_name = f"{name}_{'_'.join([str(round(d,ndigits=2)) for d in direction_s1])}"
-    two_phase_filtration_plot(
-            filtration_image,
-            save_path,
-            save_name)
+    save_name = f"direction_{name}_{'_'.join([str(round(d,ndigits=2)) for d in direction_s1])}"
 
-    # run gtda cubical homology on sublevel sets for one direction, saving persistence diagrams
     persistent_homology_cubical(
-        filtration_image,
+        directional_image,
         homology_dims,
         save_path,
         save_name)
+
    # save out run details
     with open(f"{save_path}config_{name[:-4]}.txt", 'w') as f: 
         for key, value in config.items(): 
             f.write('%s:%s\n' % (key, value))
 
-
-
-def choose_best_angle_ctfire_hist(
-        ang):
-    """Takes in the path to the ctfire output location and the original filename.
-    Returns the best angle from the angle histogram.
-
-    Best angle is chosen by rounding to integer degree angles 
-    and choosing angle with maximum frequency on histogram with 180 bins. 
-    If max frequency value is not unique, 
-    bins are iteratively widened around previous max values
-    until there is a unique maximum.
-
-    Args:
-        ang (np.array): numpy array of angles
-
-    Returns:
-        integer: best angle to nearest degree 
-    """
-    ang[ang<0.5] = 180+ang[ang<0.5]
-    bins = np.arange(0.5,181.5,step=1)
-    freq_val, bin_val = np.histogram(ang, bins=bins)
-
-    ind_best_angs = np.where(freq_val==max(freq_val))[0]
-    number_best = len(ind_best_angs)
-    if len(ind_best_angs)==1:
-        best_angle = [bin_val[ind_best_angs[0]]+.5]
-    else:
-        step=0
-        while number_best>1:
-            step+=0.5
-            best_nums = []
-            for i in range(number_best):
-                bin_min, bin_max = bin_val[ind_best_angs[i]]-step, bin_val[ind_best_angs[i]+1]+step 
-                if bin_min < 0.5:
-                    bin_min = 180+bin_min
-                    isolated_bin = np.where(ang >= bin_min, ang, np.nan)
-                    isolated_bin_lower = np.where(ang <= bin_max, ang, np.nan)
-                    isolated_bin = np.concatenate((isolated_bin, isolated_bin_lower))
-                else:
-                    isolated_bin = np.where(ang >= bin_min, ang, np.nan)
-                    isolated_bin = np.where(isolated_bin <= bin_max, isolated_bin, np.nan)
-                best_nums.append(len(isolated_bin[~np.isnan(isolated_bin)]))
-            best_nums = np.array(best_nums)
-            ind_best_nums = np.where(best_nums==max(best_nums))[0]
-            best_angle = ind_best_angs[ind_best_nums]+1
-            # print(step, ind_best_angs, best_nums, best_angle)
-            number_best = len(ind_best_nums)
-    return best_angle[0]
 
 def convert_ctfire_degree_to_s1_coords_PHT(angle):
     """Degree to direction conversion
@@ -202,7 +137,7 @@ if __name__ =="__main__":
 
     #  run example
     path = str(Path(os.getcwd()).parent) +'\\example\\'
-    save_path = path+'direction_thickening\\'
+    save_path = path+'direction\\'
     if not os.path.exists(save_path):
         os.mkdir(save_path)
 
@@ -212,9 +147,10 @@ if __name__ =="__main__":
     directions = dict(list(zip(filenames,[150,150])))
     
     for name in filenames:
+        name= filenames[0]
         binary_image = np.load(path+name)
         direction_s1 = convert_ctfire_degree_to_s1_coords_PHT(directions[name])
-        direction_thickening_ph(
+        direction_ph(
             save_path,
             binary_image,
             name,

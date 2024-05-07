@@ -14,7 +14,7 @@ from pd_plots import two_phase_filtration_plot
 
 from ph import persistent_homology_cubical
 
-def boundary_thickening_PH(
+def boundary_thickening_ph(
     save_path,
     binary_image,
     name,
@@ -134,14 +134,14 @@ if __name__ =="__main__":
     for name in tqdm(filenames):
         binary_image = np.load(path+name)
         centre = np.array(centres[name])
-        boundary_thickening_PH(
+        boundary_thickening_ph(
             save_path+'inwards/',
             binary_image,
             name[:-4],
             centre,
             inwards=True,
             homology_dims=[0,1])
-        boundary_thickening_PH(
+        boundary_thickening_ph(
             save_path+'outwards/',
             binary_image,
             name[:-4],
