@@ -1,0 +1,5 @@
+save_path:c:\Users\yp4g14\OneDrive - University of Southampton\Documents\code\topological-fibre-analysis\topological-fibre-analysis\src\example\radial_boundary_thickening\inwards/
+name:lines_angles_500_10_20_0p16667pi
+inwards:True
+homology_dims:[0, 1]
+centre:(250,250)
