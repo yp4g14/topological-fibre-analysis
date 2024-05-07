@@ -43,7 +43,7 @@ def boundary_filtration(
     filtration = (binary_image * boundary_mask) + inverse_image
     return filtration, max_val
 
-def cubical_ph_boundary(
+def boundary_ph(
     binary_image,
     centre,
     name,
@@ -105,7 +105,7 @@ if __name__ == "__main__":
     for name in tqdm(filenames):
         binary_image = np.load(path+name)
         centre = np.array(centres[name])
-        cubical_ph_boundary(
+        boundary_ph(
             binary_image,
             centre,
             name[:-4],
@@ -114,7 +114,7 @@ if __name__ == "__main__":
             plots=True,
             homology_dims=[0,1])
         binary_image = np.load(path+name)
-        cubical_ph_boundary(
+        boundary_ph(
             binary_image,
             centre,
             name[:-4],
